@@ -5,7 +5,7 @@
 //! ## Usage
 //!
 //! ``` no_run
-//! use dxf2image::{dxf2svg, dxf2png};
+//! use dxf2image::{dxf2svg, dxf2svglayers, dxf2png};
 //!
 //! fn main() {
 //!     let dxf = "sample.dxf";
@@ -13,6 +13,10 @@
 //!     // Convert to svg
 //!     let svg = "sample.svg";
 //!     dxf2svg(dxf, svg).unwrap();
+//! 
+//!    // Convert to svgs
+//!     let svgDirectory = "./";
+//!     dxf2svglayers(dxf, svg).unwrap();
 //!
 //!     // Convert to png
 //!     let png = "sample.png";
@@ -27,6 +31,7 @@ mod dxf2svg;
 mod svg2png;
 
 pub use dxf2svg::dxf2svg;
+pub use dxf2svg::dxf2svglayers;
 
 #[cfg(feature = "png")]
 pub use svg2png::svg2png;

@@ -1,6 +1,5 @@
 use crate::color::DxfColor;
 use crate::coord::{Coord, PointConverter, Position};
-use anyhow::{anyhow, bail};
 use dxf::entities::{Entity, EntityType};
 use dxf::enums::{AngleDirection, HorizontalTextJustification};
 use svgx::{
@@ -24,6 +23,33 @@ pub fn dxf2svg(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     }
 
     document.save(output_path)
+}
+
+pub fn dxf2svglayers(input_path: &str, output_directory: &str)-> anyhow::Result<()> {
+    let drawing = dxf::Drawing::load_file(input_path)?;
+
+    let layer_names = drawing.layers().map(|layer| layer.name.clone());
+
+    let extmax = drawing.header.maximum_drawing_extents.clone();
+    let extmin = drawing.header.minimum_drawing_extents.clone();
+    let coord = Coord::new(extmax, extmin, None);
+
+    Ok(for name in layer_names {
+        let mut document = Document::new().viewbox(0.0, 0.0, coord.width(), coord.height());
+        let mut is_empty = true;
+
+        for entity in drawing.entities() {
+            if entity.common.layer == name {
+                is_empty = false;
+                let _ = entity_to_node(&mut document, &drawing, &coord, entity);
+            }
+        }
+
+        if (!is_empty) {
+            let _ = document.save(&format!("{}/{}.svg", output_directory, name));
+        }
+    })
+
 }
 
 fn entity_to_node(document: &mut Document, drawing: &dxf::Drawing, coord: &Coord, entity: &Entity) -> anyhow::Result<()> {
